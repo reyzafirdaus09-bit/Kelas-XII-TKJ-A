@@ -675,7 +675,6 @@ body {
     text-align: center;
     padding: 20px 0;
 }
-
 /* ========================================= */
 /* RESPONSIVENESS & FIX KONFLIK JUDUL */
 /* ========================================= */
@@ -766,3 +765,4 @@ body.dark-mode .section--dark .section__title {
         width: 100%;
     }
 }
+
