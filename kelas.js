@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // ===========================================
-    // 3. Greeting Message Dinamis 
+   // ===========================================
+    // 3. Greeting Message Dinamis (FIXED)
     // ===========================================
     const heroTitle = document.querySelector('.hero__title');
     const currentHour = new Date().getHours();
@@ -104,9 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (heroTitle) {
-        if (heroTitle.textContent.includes('Selamat Datang!')) {
-             heroTitle.textContent = greeting;
-        }
+        // FIX: Langsung terapkan pesan sambutan dinamis
+        heroTitle.textContent = greeting;
     }
 
 
@@ -492,3 +491,4 @@ $(document).ready(function(){
         }
     });
 });
+
