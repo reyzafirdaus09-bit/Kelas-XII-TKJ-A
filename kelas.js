@@ -86,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-   
     // ===========================================
     // 3. Greeting Message Dinamis (FIXED)
     // ===========================================
@@ -492,4 +491,45 @@ $(document).ready(function(){
     });
 });
 
+// ===============================
+// FILTER ANGGOTA SMOOTH
+// ===============================
 
+const filterButtons = document.querySelectorAll(".filter-btn");
+const memberCards = document.querySelectorAll(
+    ".member-card, .member-photo-card"
+);
+
+filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        // aktif button
+        filterButtons.forEach(btn => btn.classList.remove("active-filter"));
+        button.classList.add("active-filter");
+
+        const filter = button.dataset.filter;
+
+        memberCards.forEach(card => {
+            const role = card.dataset.role;
+            const gender = card.dataset.gender;
+
+            let show =
+                filter === "all" ||
+                filter === role ||
+                filter === gender;
+
+            if (show) {
+                card.classList.remove("hidden");
+                setTimeout(() => {
+                    card.style.opacity = "1";
+                    card.style.transform = "scale(1)";
+                }, 50);
+            } else {
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.8)";
+                setTimeout(() => {
+                    card.classList.add("hidden");
+                }, 300);
+            }
+        });
+    });
+});
