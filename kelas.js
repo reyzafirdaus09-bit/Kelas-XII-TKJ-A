@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', () => {
             if (navMenu && navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
-                navToggle.classList.remove('active');
+                if (navToggle) navToggle.classList.remove('active');
             }
         });
     });
@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTheme = localStorage.getItem('theme');
     if (currentTheme === 'dark') {
         body.classList.add('dark-mode');
-        // Pastikan tema awal sudah diatur
         if (darkModeToggle) {
              darkModeToggle.textContent = '🌙'; 
         }
@@ -82,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 darkModeToggle.textContent = '☀️';
             }
             
-            // PENTING: Update gradien latar belakang hero saat mode gelap berubah
             setupBackgroundChanger(true); 
         });
     }
@@ -106,12 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (heroTitle) {
-        heroTitle.textContent = greeting;
+        if (heroTitle.textContent.includes('Selamat Datang!')) {
+             heroTitle.textContent = greeting;
+        }
     }
 
 
     // ===========================================
-    // 4. Typing Effect pada Subtitle (Menggunakan ID: typed-text)
+    // 4. Typing Effect pada Subtitle
     // ===========================================
     const typedTextElement = document.getElementById('typed-text');
     const textToType = ["Kreatif.", "Kolaboratif.", "Berani Berdampak.", "Inilah Kami."];
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalCaption = document.getElementById('lightbox-caption');
         const closeBtn = document.querySelector('.lightbox-close');
 
-        if (!modal) return; // Cek keberadaan modal
+        if (!modal) return; 
 
         galleryTriggers.forEach(item => {
             item.addEventListener('click', () => {
@@ -197,7 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. Interactive Card 3D Tilt Effect 
     // ===========================================
     function setupCardTiltEffect() {
-        const tiltableElements = document.querySelectorAll('.gallery__item, .member-photo-card, .member-card');
+        // Tambahkan .member-photo-card di sini untuk tilt effect pada foto siswa
+        const tiltableElements = document.querySelectorAll('.gallery__item, .member-card, .member-photo-card'); 
         
         tiltableElements.forEach(card => {
             card.addEventListener('mousemove', (e) => {
@@ -209,11 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mouseX = e.clientX;
                 const mouseY = e.clientY;
 
-                const maxRotation = 15;
+                const maxRotation = 5; 
                 const rotateX = ((centerY - mouseY) / rect.height) * maxRotation; 
                 const rotateY = ((mouseX - centerX) / rect.width) * maxRotation;   
                 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
             });
 
             card.addEventListener('mouseleave', () => {
@@ -226,54 +227,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ===========================================
-    // 7. Filter Anggota Kelas (Smooth Fade)
+    // 7. Filter Anggota Kelas (FINAL FIX)
     // ===========================================
     function setupMemberFilter() {
         const filterButtons = document.querySelectorAll('.filter-btn');
-        const memberCards = document.querySelectorAll('.member-photo-card, .member-card');
+        // Selektor yang benar: tangkap semua jenis kartu
+        const memberCards = document.querySelectorAll('.member-card, .member-photo-card'); 
         
         if (filterButtons.length === 0 || memberCards.length === 0) return;
 
         filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', function() {
                 
                 filterButtons.forEach(btn => btn.classList.remove('active-filter'));
-                button.classList.add('active-filter');
+                this.classList.add('active-filter');
 
-                const filterValue = button.getAttribute('data-filter');
+                const filterValue = this.getAttribute('data-filter'); // Ambil nilai dari tombol
                 
-                // Tahap 1: Sembunyikan semua kartu dengan transisi
                 memberCards.forEach(card => {
-                    card.classList.add('hidden');
+                    const cardGender = card.getAttribute('data-gender'); // Ambil gender dari kartu
+                    const cardRole = card.getAttribute('data-role');     // Ambil role dari kartu
+                    
+                    let shouldShow = false;
+
+                    if (filterValue === 'all') {
+                        shouldShow = true;
+                    } 
+                    
+                    // Filter Inti & Wali (data-filter="inti")
+                    else if (filterValue === 'inti') {
+                        // Tampilkan kartu yang memiliki role 'core' ATAU 'teacher'
+                        if (cardRole === 'core' || cardRole === 'teacher') {
+                            shouldShow = true;
+                        }
+                    } 
+                    
+                    // Filter Wali Kelas Saja (data-filter="wali")
+                    else if (filterValue === 'wali') {
+                         if (cardRole === 'teacher') {
+                             shouldShow = true;
+                         }
+                    }
+                    
+                    // Filter Gender (data-filter="pria" atau "wanita")
+                    else if (filterValue === 'pria' || filterValue === 'wanita') {
+                        // Tampilkan semua kartu yang gender-nya cocok
+                        if (cardGender === filterValue) {
+                            shouldShow = true;
+                        }
+                    }
+                    
+                    // Penerapan Tampil/Sembunyi dengan Transisi Opacity
+                    if (shouldShow) {
+                         // Pastikan display diatur sebelum opacity untuk transisi fade-in
+                        card.style.display = card.classList.contains('member-card') ? 'flex' : 'block'; // Gunakan flex/block sesuai jenis kartu
+                        setTimeout(() => {
+                            card.style.opacity = 1;
+                        }, 10); 
+                    } else {
+                        // Sembunyikan dengan fade-out, lalu display:none
+                        card.style.opacity = 0;
+                        setTimeout(() => {
+                           card.style.display = 'none';
+                        }, 300); // Harus sama dengan durasi transisi CSS
+                    }
                 });
-                
-                setTimeout(() => {
-                    
-                    // Tahap 2: Tampilkan kartu yang sesuai
-                    memberCards.forEach(card => {
-                        const cardRole = card.getAttribute('data-role');
-                        const cardGender = card.getAttribute('data-gender');
-                        
-                        let shouldShow = false;
-
-                        if (filterValue === 'all') {
-                            shouldShow = true;
-                        } else if (cardRole && cardRole === filterValue) {
-                            shouldShow = true;
-                        } else if (cardGender && (filterValue === 'pria' || filterValue === 'wanita') && cardGender === filterValue) {
-                            shouldShow = true;
-                        }
-                        
-                        if (shouldShow) {
-                            card.classList.remove('hidden');
-                        }
-                    });
-                    
-                }, 300); 
-
             });
         });
         
+        // Panggil filter 'Semua' saat halaman dimuat
         const initialFilter = document.querySelector('.filter-btn[data-filter="all"]');
         if (initialFilter) {
             initialFilter.click();
@@ -293,23 +315,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parallaxElements.length === 0) return;
 
         function updateParallax() {
-            const scrollPosition = window.pageYOffset;
-            
-            parallaxElements.forEach(el => {
-                const rect = el.getBoundingClientRect();
-                const viewportCenter = window.innerHeight / 2;
-                
-                if (rect.top <= window.innerHeight && rect.bottom >= 0) {
+            window.requestAnimationFrame(() => {
+                parallaxElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const viewportCenter = window.innerHeight / 2;
                     
-                    const offsetFromCenter = rect.top - viewportCenter;
-                    let speed = 0.15; 
-                    
-                    const transformY = offsetFromCenter * speed; 
+                    if (rect.top <= window.innerHeight && rect.bottom >= 0) {
+                        
+                        const offsetFromCenter = rect.top - viewportCenter;
+                        let speed = 0.15; 
+                        
+                        const transformY = offsetFromCenter * speed; 
 
-                    el.style.transform = `translateY(${transformY}px)`;
-                } else {
-                    el.style.transform = 'translateY(0)';
-                }
+                        el.style.transform = `translateY(${transformY}px)`;
+                    } else {
+                        el.style.transform = 'translateY(0)';
+                    }
+                });
             });
         }
         
@@ -325,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let layer1, layer2, activeLayer, inactiveLayer;
     let currentImageIndex = 0;
     
-    // GANTI URL DI BAWAH DENGAN URL GAMBAR KELAS ANDA!
     const images = [
         'banner1.jpg',
         'benner2.jpg',
@@ -333,7 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const getGradient = () => {
-        // Tentukan opacity berdasarkan Dark Mode
         const opacity = document.body.classList.contains('dark-mode') ? 0.8 : 0.6;
         return `linear-gradient(rgba(0, 0, 0, ${opacity}), rgba(0, 0, 0, ${opacity}))`;
     };
@@ -343,35 +363,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!heroSection || images.length === 0) return;
 
         if (!layer1) {
-            // Setup awal layer hanya sekali
             layer1 = document.createElement('div');
             layer2 = document.createElement('div');
             
             layer1.classList.add('hero__background-layer');
             layer2.classList.add('hero__background-layer');
             
-            heroSection.insertBefore(layer1, heroSection.firstChild);
-            heroSection.insertBefore(layer2, heroSection.firstChild);
+            heroSection.insertBefore(layer1, heroSection.querySelector('.hero__background-overlay'));
+            heroSection.insertBefore(layer2, heroSection.querySelector('.hero__background-overlay'));
             
             activeLayer = layer1;
             inactiveLayer = layer2;
             
-            // Set gambar awal
             activeLayer.style.backgroundImage = `${getGradient()}, url('${images[currentImageIndex]}')`;
             activeLayer.style.opacity = 1;
             inactiveLayer.style.opacity = 0;
 
             if (!isManualChange) {
-                // Hanya jalankan interval jika bukan perubahan manual (mode gelap)
                 setInterval(crossFadeBackground, 5000); 
             }
         }
         
         if (isManualChange) {
-            // Jika perubahan mode gelap, terapkan gradien baru ke layer aktif
             activeLayer.style.backgroundImage = `${getGradient()}, url('${images[currentImageIndex]}')`;
-            
-            // Perbarui juga layer inaktif agar siap saat transisi berikutnya
             const nextIndex = (currentImageIndex + 1) % images.length;
             inactiveLayer.style.backgroundImage = `${getGradient()}, url('${images[nextIndex]}')`;
         }
