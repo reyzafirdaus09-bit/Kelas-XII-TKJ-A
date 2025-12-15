@@ -8,14 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const navMenu = document.getElementById('main-nav');
     const navLinks = document.querySelectorAll('.nav__link');
 
-    navToggle.addEventListener('click', () => {
-        navToggle.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
+    if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+    }
 
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
-            if (navMenu.classList.contains('active')) {
+            if (navMenu && navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
                 navToggle.classList.remove('active');
             }
@@ -25,26 +27,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactForm = document.getElementById('contact-form');
     const formMessage = document.getElementById('form-message');
 
-    contactForm.addEventListener('submit', function(event) {
-        event.preventDefault(); 
-        
-        const emailInput = this.querySelector('input[type="email"]').value;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (contactForm && formMessage) {
+        contactForm.addEventListener('submit', function(event) {
+            event.preventDefault(); 
+            
+            const emailInput = this.querySelector('input[type="email"]').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!emailRegex.test(emailInput)) {
-            formMessage.textContent = '❌ Error: Format email tidak valid.';
-            formMessage.style.color = '#dc3545';
-            return;
-        }
+            if (!emailRegex.test(emailInput)) {
+                formMessage.textContent = '❌ Error: Format email tidak valid.';
+                formMessage.style.color = '#dc3545';
+                return;
+            }
 
-        formMessage.textContent = '✅ Pesan Anda telah diterima! Terima kasih.';
-        formMessage.style.color = 'var(--color-primary)'; 
+            formMessage.textContent = '✅ Pesan Anda telah diterima! Terima kasih.';
+            formMessage.style.color = 'var(--color-primary)'; 
 
-        setTimeout(() => {
-            contactForm.reset();
-            formMessage.textContent = '';
-        }, 4000); 
-    });
+            setTimeout(() => {
+                contactForm.reset();
+                formMessage.textContent = '';
+            }, 4000); 
+        });
+    }
 
 
     // ===========================================
@@ -56,22 +60,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTheme = localStorage.getItem('theme');
     if (currentTheme === 'dark') {
         body.classList.add('dark-mode');
-        darkModeToggle.textContent = '🌙'; 
+        // Pastikan tema awal sudah diatur
+        if (darkModeToggle) {
+             darkModeToggle.textContent = '🌙'; 
+        }
     } else {
-        darkModeToggle.textContent = '☀️'; 
+        if (darkModeToggle) {
+            darkModeToggle.textContent = '☀️'; 
+        }
+    }
+    
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                darkModeToggle.textContent = '🌙';
+            } else {
+                localStorage.setItem('theme', 'light');
+                darkModeToggle.textContent = '☀️';
+            }
+            
+            // PENTING: Update gradien latar belakang hero saat mode gelap berubah
+            setupBackgroundChanger(true); 
+        });
     }
 
-    darkModeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark-mode');
-        
-        if (body.classList.contains('dark-mode')) {
-            localStorage.setItem('theme', 'dark');
-            darkModeToggle.textContent = '🌙';
-        } else {
-            localStorage.setItem('theme', 'light');
-            darkModeToggle.textContent = '☀️';
-        }
-    });
 
     // ===========================================
     // 3. Greeting Message Dinamis 
@@ -90,10 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
         greeting = "Selamat Malam! Mari Bersiap untuk Esok Hari";
     }
 
-    heroTitle.textContent = greeting;
+    if (heroTitle) {
+        heroTitle.textContent = greeting;
+    }
+
 
     // ===========================================
-    // 4. Typing Effect pada Subtitle 
+    // 4. Typing Effect pada Subtitle (Menggunakan ID: typed-text)
     // ===========================================
     const typedTextElement = document.getElementById('typed-text');
     const textToType = ["Kreatif.", "Kolaboratif.", "Berani Berdampak.", "Inilah Kami."];
@@ -103,6 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const delayBetweenWords = 1500; 
 
     function startTypingEffect() {
+        if (!typedTextElement) return;
+        
         if (textIndex < textToType.length) {
             if (charIndex < textToType[textIndex].length) {
                 typedTextElement.textContent += textToType[textIndex].charAt(charIndex);
@@ -118,6 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function eraseText() {
+        if (!typedTextElement) return;
+        
         if (charIndex > 0) {
             typedTextElement.textContent = textToType[textIndex].substring(0, charIndex - 1);
             charIndex--;
@@ -128,7 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    setTimeout(startTypingEffect, 700);
+    if (typedTextElement) {
+        setTimeout(startTypingEffect, 700);
+    }
 
 
     // ===========================================
@@ -141,6 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalCaption = document.getElementById('lightbox-caption');
         const closeBtn = document.querySelector('.lightbox-close');
 
+        if (!modal) return; // Cek keberadaan modal
+
         galleryTriggers.forEach(item => {
             item.addEventListener('click', () => {
                 modal.style.display = "block";
@@ -150,10 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = "none";
-            document.body.style.overflow = 'auto'; 
-        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = "none";
+                document.body.style.overflow = 'auto'; 
+            });
+        }
 
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -202,8 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     function setupMemberFilter() {
         const filterButtons = document.querySelectorAll('.filter-btn');
-        const memberCards = document.querySelectorAll('.member-photo-card, .member-card--core, .member-card--teacher');
+        const memberCards = document.querySelectorAll('.member-photo-card, .member-card');
         
+        if (filterButtons.length === 0 || memberCards.length === 0) return;
+
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {
                 
@@ -217,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.classList.add('hidden');
                 });
                 
-                // Tambahkan jeda waktu untuk memungkinkan transisi menyembunyikan selesai
                 setTimeout(() => {
                     
                     // Tahap 2: Tampilkan kartu yang sesuai
@@ -227,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         let shouldShow = false;
 
-                        // Logic Filtering
                         if (filterValue === 'all') {
                             shouldShow = true;
                         } else if (cardRole && cardRole === filterValue) {
@@ -236,18 +264,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             shouldShow = true;
                         }
                         
-                        // Tampilkan kartu
                         if (shouldShow) {
                             card.classList.remove('hidden');
                         }
                     });
                     
-                }, 300); // Jeda 300ms untuk efek fade-out yang lembut
+                }, 300); 
 
             });
         });
         
-        // Panggil filter 'all' saat pertama kali dimuat
         const initialFilter = document.querySelector('.filter-btn[data-filter="all"]');
         if (initialFilter) {
             initialFilter.click();
@@ -276,10 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (rect.top <= window.innerHeight && rect.bottom >= 0) {
                     
                     const offsetFromCenter = rect.top - viewportCenter;
-                    
                     let speed = 0.15; 
                     
-                    // MODIFIKASI: Menghilangkan perkalian -1 agar teks bergerak ke bawah saat scroll ke bawah.
                     const transformY = offsetFromCenter * speed; 
 
                     el.style.transform = `translateY(${transformY}px)`;
@@ -298,66 +322,71 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     // 9. Dynamic Background Changer (Slideshow Cross-Fade)
     // ===========================================
-    function setupBackgroundChanger() {
+    let layer1, layer2, activeLayer, inactiveLayer;
+    let currentImageIndex = 0;
+    
+    // GANTI URL DI BAWAH DENGAN URL GAMBAR KELAS ANDA!
+    const images = [
+        'banner1.jpg',
+        'benner2.jpg',
+        'benner3.jpg'
+    ];
+
+    const getGradient = () => {
+        // Tentukan opacity berdasarkan Dark Mode
+        const opacity = document.body.classList.contains('dark-mode') ? 0.8 : 0.6;
+        return `linear-gradient(rgba(0, 0, 0, ${opacity}), rgba(0, 0, 0, ${opacity}))`;
+    };
+
+    function setupBackgroundChanger(isManualChange = false) {
         const heroSection = document.getElementById('hero');
-        if (!heroSection) return;
+        if (!heroSection || images.length === 0) return;
 
-        // GANTI URL DI BAWAH DENGAN URL GAMBAR KELAS ANDA!
-        const images = [
-            'banner1.jpg',
-            'benner2.jpg',
-            'benner3.jpg'
-        ];
-        
-        if (images.length === 0) return;
-
-        // 1. Buat Dua Lapisan Latar Belakang secara Dinamis
-        const layer1 = document.createElement('div');
-        const layer2 = document.createElement('div');
-        
-        layer1.classList.add('hero__background-layer');
-        layer2.classList.add('hero__background-layer');
-        
-        // Tambahkan sebelum konten utama
-        heroSection.insertBefore(layer1, heroSection.firstChild);
-        heroSection.insertBefore(layer2, heroSection.firstChild);
-
-        // 2. Inisialisasi State
-        let currentImageIndex = 0;
-        let activeLayer = layer1;
-        let inactiveLayer = layer2;
-        
-        // Fungsi untuk mendapatkan gradien overlay (untuk Dark Mode)
-        const getGradient = () => {
-            const opacity = document.body.classList.contains('dark-mode') ? 0.8 : 0.6;
-            return `linear-gradient(rgba(0, 0, 0, ${opacity}), rgba(0, 0, 0, ${opacity}))`;
-        };
-
-        // Set gambar awal pada layer pertama dan pastikan layer tersebut terlihat
-        layer1.style.backgroundImage = `${getGradient()}, url('${images[currentImageIndex]}')`;
-        layer1.style.opacity = 1;
-        layer2.style.opacity = 0;
-        
-        // 3. Fungsi Utama Slideshow Cross-fade
-        function crossFadeBackground() {
-            // Pindahkan ke gambar berikutnya
-            currentImageIndex = (currentImageIndex + 1) % images.length;
-            const nextImageUrl = images[currentImageIndex];
-
-            // Setup layer yang akan datang (saat ini inactiveLayer)
-            inactiveLayer.style.backgroundImage = `${getGradient()}, url('${nextImageUrl}')`;
+        if (!layer1) {
+            // Setup awal layer hanya sekali
+            layer1 = document.createElement('div');
+            layer2 = document.createElement('div');
             
-            // Lakukan Transisi (Cross-fade)
-            // Ini akan memicu transisi opacity 2s di CSS
-            activeLayer.style.opacity = 0; 
-            inactiveLayer.style.opacity = 1; 
+            layer1.classList.add('hero__background-layer');
+            layer2.classList.add('hero__background-layer');
+            
+            heroSection.insertBefore(layer1, heroSection.firstChild);
+            heroSection.insertBefore(layer2, heroSection.firstChild);
+            
+            activeLayer = layer1;
+            inactiveLayer = layer2;
+            
+            // Set gambar awal
+            activeLayer.style.backgroundImage = `${getGradient()}, url('${images[currentImageIndex]}')`;
+            activeLayer.style.opacity = 1;
+            inactiveLayer.style.opacity = 0;
 
-            // Ganti peran layer untuk siklus berikutnya
-            [activeLayer, inactiveLayer] = [inactiveLayer, activeLayer];
+            if (!isManualChange) {
+                // Hanya jalankan interval jika bukan perubahan manual (mode gelap)
+                setInterval(crossFadeBackground, 5000); 
+            }
         }
+        
+        if (isManualChange) {
+            // Jika perubahan mode gelap, terapkan gradien baru ke layer aktif
+            activeLayer.style.backgroundImage = `${getGradient()}, url('${images[currentImageIndex]}')`;
+            
+            // Perbarui juga layer inaktif agar siap saat transisi berikutnya
+            const nextIndex = (currentImageIndex + 1) % images.length;
+            inactiveLayer.style.backgroundImage = `${getGradient()}, url('${images[nextIndex]}')`;
+        }
+    }
 
-        // Jalankan perubahan setiap 5 detik (5000ms)
-        setInterval(crossFadeBackground, 5000); 
+    function crossFadeBackground() {
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        const nextImageUrl = images[currentImageIndex];
+
+        inactiveLayer.style.backgroundImage = `${getGradient()}, url('${nextImageUrl}')`;
+        
+        activeLayer.style.opacity = 0; 
+        inactiveLayer.style.opacity = 1; 
+
+        [activeLayer, inactiveLayer] = [inactiveLayer, activeLayer];
     }
     
     setupBackgroundChanger();
@@ -400,14 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 11. Highlight Navigasi Aktif saat Scroll
     // ===========================================
     const sections = document.querySelectorAll('section');
-    const headerHeight = 70; // Sesuaikan dengan tinggi header
+    const headerHeight = 70; 
 
     function setActiveLink() {
         let current = '';
         
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            if (pageYOffset >= sectionTop - headerHeight - 30) { 
+            if (window.pageYOffset >= sectionTop - headerHeight - 30) { 
                 current = section.getAttribute('id');
             }
         });
@@ -442,7 +471,7 @@ $(document).ready(function(){
             if (target.length) {
                 e.preventDefault();
                 $('html, body').animate({
-                    scrollTop: target.offset().top - 70 // Offset untuk header fixed
+                    scrollTop: target.offset().top - 70 
                 }, 1000); 
                 return false;
             }
